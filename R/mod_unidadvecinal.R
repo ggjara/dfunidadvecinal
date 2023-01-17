@@ -68,7 +68,7 @@ mod_unidadvecinal_ui <- function(id) {
             "', coords);});}
                  </script>
                  <script src='https://maps.googleapis.com/maps/api/js?key=",
-            key,
+            config::get("google_api_key"),
             "&libraries=places&callback=initAutocomplete' async defer></script>"
           )
         )
