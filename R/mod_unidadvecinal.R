@@ -191,18 +191,10 @@ mod_unidadvecinal_server <- function(id) {
       sf::st_drop_geometry(get_uv(point_selected()))
     })
 
-    val_collapsed <- reactiveVal(TRUE)
-
-    observeEvent(unidad_vecinal_result(), {
-      if (val_collapsed()) {
-        bs4Dash::updateBox("results_map",
-                           action = "toggle")
-        bs4Dash::updateBox("results_unidadvecinal",
-                           action = "toggle")
-        bs4Dash::updateBox("results_google",
-                           action = "toggle")
-        val_collapsed(FALSE)
-      }
+    observeEvent(coords(), {
+      if (input$results_map$collapsed) { bs4Dash::updateBox("results_map", action = "toggle")}
+      if (input$results_unidadvecinal$collapsed) { bs4Dash::updateBox("results_unidadvecinal", action = "toggle")}
+      if (input$results_google$collapsed) { bs4Dash::updateBox("results_google", action = "toggle")}
     })
 
     unidad_vecinal_result <- reactive({
