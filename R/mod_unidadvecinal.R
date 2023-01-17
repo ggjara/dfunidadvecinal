@@ -113,6 +113,7 @@ mod_unidadvecinal_ui <- function(id) {
   ))
 }
 
+collapsed =  TRUE
 
 #' unidadvecinal Server Functions
 #'
@@ -184,10 +185,10 @@ mod_unidadvecinal_server <- function(id) {
       sf::st_drop_geometry(get_uv(point_selected()))
     })
 
-    collapsed = reactiveVal(TRUE)
+
     observeEvent(unidad_vecinal_result(), {
 
-      if(collapsed()){
+      if(collapsed){
 
 
       bs4Dash::updateBox(
@@ -202,8 +203,7 @@ mod_unidadvecinal_server <- function(id) {
         "results_google",
         action = "toggle"
       )
-
-      collapsed <<- reactiveVal(TRUE)
+      collapsed = FALSE
       }
     })
 
@@ -254,8 +254,8 @@ mod_unidadvecinal_server <- function(id) {
       result <- unidad_vecinal_result() |>
         dplyr::left_join(dic_variables, by = c("Feature" = "NOMBRE")) |>
         dplyr::rename("Value" = "1") |>
-        dplyr::rename("Description" = "DESCRIPCIÓN") |>
-        dplyr::select("Description", "Value")
+        dplyr::rename(`Description` = `DESCRIPCIÓN`) |>
+        dplyr::select(`Description`, `Value`)
 
       DT::datatable(
         result,
