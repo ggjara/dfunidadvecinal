@@ -12,7 +12,6 @@ mod_unidadvecinal_ui <- function(id) {
   tagList(shiny::fluidRow(
     column(
       width = 12,
-      waiter::useWaiter(),
       bs4Dash::box(
         id = ns("parameters"),
         width = 4,
@@ -88,7 +87,7 @@ mod_unidadvecinal_ui <- function(id) {
         collapsed = TRUE,
         solidHeader = TRUE,
         collapsible = TRUE,
-        DT::DTOutput(outputId = ns("unidad_vecinal"))
+        shinycssloaders::withSpinner(DT::DTOutput(outputId = ns("unidad_vecinal")))
       )
     ),
     column(
@@ -100,7 +99,7 @@ mod_unidadvecinal_ui <- function(id) {
         collapsed = TRUE,
         solidHeader = TRUE,
         collapsible = TRUE,
-        leaflet::leafletOutput(ns("map"))
+        shinycssloaders::withSpinner(leaflet::leafletOutput(ns("map")))
       ),
       bs4Dash::box(
         id = ns("results_google"),
@@ -109,7 +108,7 @@ mod_unidadvecinal_ui <- function(id) {
         collapsed = TRUE,
         solidHeader = TRUE,
         collapsible = TRUE,
-        shiny::htmlOutput(outputId = ns("full_address"))
+        shinycssloaders::withSpinner(shiny::htmlOutput(outputId = ns("full_address")))
       )
     )
   ))
@@ -220,13 +219,6 @@ mod_unidadvecinal_server <- function(id) {
 
     output$map <- leaflet::renderLeaflet({
       shiny::req(unidad_vecinal_temp())
-
-      w_results$show()
-
-      on.exit({
-        w_results$hide()
-      })
-
       tmap::tmap_options(list(
         basemaps = c(
           "OpenStreetMap",

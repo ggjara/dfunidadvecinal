@@ -21,6 +21,7 @@ Imports:
     polished,
     sf,
     shiny (>= 1.7.4),
+    shinycssloaders,
     shinyWidgets,
     stringr,
     tmap,
