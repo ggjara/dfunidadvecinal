@@ -17,6 +17,7 @@ Imports:
     googleway,
     highcharter,
     leaflet,
+    pkgload,
     polished,
     sf,
     shiny (>= 1.7.4),

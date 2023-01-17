@@ -42,3 +42,6 @@ get_golem_config <- function(
     use_parent = use_parent
   )
 }
+
+
+options(shiny.autoload.r = FALSE)
