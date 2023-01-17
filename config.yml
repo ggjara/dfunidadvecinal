@@ -1,0 +1,5 @@
+default:
+  polished_app_name: !expr Sys.getenv("POLISHED_APP_NAME")
+  polished_api_key: !expr Sys.getenv("POLISHED_API_KEY")
+  google_api_key: !expr Sys.getenv("GOOGLE_API_KEY")
+
