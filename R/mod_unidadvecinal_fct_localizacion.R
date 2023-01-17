@@ -1,27 +1,28 @@
-path_reg = "https://raw.githubusercontent.com/altazor-1967/Comunas-de-Chile/master/Latitud%20-%20Longitud%20Chile.csv"
-regiones_comunas <- read.csv(path_reg)
-regiones_comunas <- regiones_comunas |>
-  dplyr::mutate(`Región` = stringr::str_trim(`Región`)) |>
-  dplyr::select(`Comuna`, `Provincia`, `Región`)
-
-regiones = unique(regiones_comunas$Región)
-comunas <- list()
-for(region in regiones){
-  comunas[[region]] = unique(regiones_comunas[regiones_comunas$Región == region, "Comuna"])
-}
-
+# path_reg = "https://raw.githubusercontent.com/altazor-1967/Comunas-de-Chile/master/Latitud%20-%20Longitud%20Chile.csv"
+# regiones_comunas <- read.csv(path_reg)
+# regiones_comunas <- regiones_comunas |>
+#   dplyr::mutate(`Región` = stringr::str_trim(`Región`)) |>
+#   dplyr::select(`Comuna`, `Provincia`, `Región`)
+#
+# regiones = unique(regiones_comunas$Región)
+# comunas <- list()
+# for(region in regiones){
+#   comunas[[region]] = unique(regiones_comunas[regiones_comunas$Región == region, "Comuna"])
+# }
+#
+# dic_variables <- read.csv("data/diccionariovariables.csv")
+#
+# unidad_vecinales <-
+#   sf::read_sf(
+#     "data/resultados-censo-2017-según-unidad-vecinal/Unidades_Vecinales_Poblacion_Viviendas.shp"
+#   )
 
 
 sf::sf_use_s2(FALSE)
 ggmap::register_google(config::get("google_api_key"))
-unidad_vecinales <-
-  sf::read_sf(
-    "data/resultados-censo-2017-según-unidad-vecinal/Unidades_Vecinales_Poblacion_Viviendas.shp"
-  )
-
 googleway::set_key(key = config::get("google_api_key"))
 
-dic_variables <- read.csv("data/diccionariovariables.csv")
+
 
 #' Get Unidad Vecinal With Address
 #'
