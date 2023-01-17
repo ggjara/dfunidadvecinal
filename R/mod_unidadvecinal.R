@@ -9,26 +9,28 @@
 #' @importFrom shiny NS tagList
 mod_unidadvecinal_ui <- function(id) {
   ns <- NS(id)
-  tagList(shiny::fluidRow(column(
-    width = 12,
-    bs4Dash::box(
-      id = ns("parameters"),
-      width = 4,
-      title = "Parameters",
-      # icon = shiny::icon("list", lib = "glyphicon"),
-      status = "primary",
-      solidHeader = TRUE,
-      collapsible = TRUE,
-      div(
-        shiny::textInput(inputId = ns("my_address"), label = "Type An Address"),
-        HTML(
-          paste0(
-            " <script>
+  tagList(shiny::fluidRow(
+    column(
+      width = 12,
+      waiter::useWaiter(),
+      bs4Dash::box(
+        id = ns("parameters"),
+        width = 4,
+        title = "Parameters",
+        # icon = shiny::icon("list", lib = "glyphicon"),
+        status = "primary",
+        solidHeader = TRUE,
+        collapsible = TRUE,
+        div(
+          shiny::textInput(inputId = ns("my_address"), label = "Type An Address"),
+          HTML(
+            paste0(
+              " <script>
                 function initAutocomplete() {
 
                  var autocomplete =   new google.maps.places.Autocomplete(document.getElementById('",
-            ns("my_address"),
-            "'),{types: ['geocode']});
+              ns("my_address"),
+              "'),{types: ['geocode']});
                  autocomplete.setFields(['address_components', 'formatted_address',  'geometry', 'icon', 'name']);
                  autocomplete.addListener('place_changed', function() {
                  var place = autocomplete.getPlace();
@@ -55,26 +57,27 @@ mod_unidadvecinal_ui <- function(id) {
                  var coords = place.geometry.location;
                  //console.log(address);
                  Shiny.onInputChange('",
-            ns('jsValue'),
-            "', address);
+              ns('jsValue'),
+              "', address);
                  Shiny.onInputChange('",
-            ns('jsValueAddressNumber'),
-            "', address_number);
+              ns('jsValueAddressNumber'),
+              "', address_number);
                  Shiny.onInputChange('",
-            ns('jsValuePretty'),
-            "', addressPretty);
+              ns('jsValuePretty'),
+              "', addressPretty);
                  Shiny.onInputChange('",
-            ns('jsValueCoords'),
-            "', coords);});}
+              ns('jsValueCoords'),
+              "', coords);});}
                  </script>
                  <script src='https://maps.googleapis.com/maps/api/js?key=",
-            config::get("google_api_key"),
-            "&libraries=places&callback=initAutocomplete' async defer></script>"
+              config::get("google_api_key"),
+              "&libraries=places&callback=initAutocomplete' async defer></script>"
+            )
           )
         )
       )
     )
-  )),
+  ),
   shiny::fluidRow(
     column(
       width = 6,
@@ -106,8 +109,7 @@ mod_unidadvecinal_ui <- function(id) {
         collapsed = TRUE,
         solidHeader = TRUE,
         collapsible = TRUE,
-        shiny::htmlOutput(outputId = ns("full_address")),
-        shiny::htmlOutput(outputId = ns("full_coords"))
+        shiny::htmlOutput(outputId = ns("full_address"))
       )
     )
   ))
@@ -122,6 +124,13 @@ collapsed =  TRUE
 mod_unidadvecinal_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
+    # Waiter
+    w_results <- waiter::Waiter$new(id = c(ns("results_map"),
+                                           ns("results_unidadvecinal"),
+                                           ns("results_google")),
+                                    html = waiter::spin_3k(),
+                                    color = waiter::transparent(0.5))
 
     coords <- reactive({
       if (!is.null(input$jsValueCoords)) {
@@ -148,13 +157,11 @@ mod_unidadvecinal_server <- function(id) {
 
 
     output$full_address <- renderUI({
-      if (!is.null(address())) {
-        shiny::HTML(paste0("<b>Full address:</b><br>", address()))
-      }
-    })
-
-    output$full_coords <- renderUI({
-      if (!is.null(coords())) {
+      if (!is.null(address()) & !is.null(coords())) {
+        shiny::tagList(shiny::HTML(paste0(
+          "<b>Full address:</b><br>", address()
+        )),
+        shiny::br(),
         shiny::HTML(
           paste0(
             "<b>Coords:</b><br>",
@@ -164,7 +171,7 @@ mod_unidadvecinal_server <- function(id) {
             "Longitude: ",
             coords()$lng
           )
-        )
+        ))
       }
     })
 
@@ -185,25 +192,17 @@ mod_unidadvecinal_server <- function(id) {
       sf::st_drop_geometry(get_uv(point_selected()))
     })
 
+    val_collapsed <- reactiveVal(TRUE)
 
     observeEvent(unidad_vecinal_result(), {
-
-      if(collapsed){
-
-
-      bs4Dash::updateBox(
-        "results_map",
-        action = "toggle"
-      )
-      bs4Dash::updateBox(
-        "results_unidadvecinal",
-        action = "toggle"
-      )
-      bs4Dash::updateBox(
-        "results_google",
-        action = "toggle"
-      )
-      collapsed = FALSE
+      if (val_collapsed()) {
+        bs4Dash::updateBox("results_map",
+                           action = "toggle")
+        bs4Dash::updateBox("results_unidadvecinal",
+                           action = "toggle")
+        bs4Dash::updateBox("results_google",
+                           action = "toggle")
+        val_collapsed(FALSE)
       }
     })
 
@@ -214,16 +213,27 @@ mod_unidadvecinal_server <- function(id) {
         result <- cbind("Feature" = rownames(result), result)
         rownames(result) <- 1:nrow(result)
         result <- as.data.frame(result)
-        result <- result[1:(nrow(result) - 2),]
+        result <- result[1:(nrow(result) - 2), ]
         result
       }
     })
 
     output$map <- leaflet::renderLeaflet({
       shiny::req(unidad_vecinal_temp())
-      tmap::tmap_options(list(basemaps = c("OpenStreetMap",
-                                     "Esri.WorldTopoMap",
-                                     "Esri.WorldGrayCanvas")))
+
+      w_results$show()
+
+      on.exit({
+        w_results$hide()
+      })
+
+      tmap::tmap_options(list(
+        basemaps = c(
+          "OpenStreetMap",
+          "Esri.WorldTopoMap",
+          "Esri.WorldGrayCanvas"
+        )
+      ))
       tm <- tmap::tm_shape(
         unidad_vecinales |>
           filter(COD_REGION == unidad_vecinal_temp()$COD_REGION) |>
@@ -244,7 +254,6 @@ mod_unidadvecinal_server <- function(id) {
         ) +
         tmap::tm_shape(point_selected()) +
         tmap::tm_dots()
-
       tmap::tmap_leaflet(tm)
     })
 
@@ -259,8 +268,8 @@ mod_unidadvecinal_server <- function(id) {
 
       DT::datatable(
         result,
-        style = 'bootstrap4',
-        extensions = 'Scroller',
+        style = "bootstrap4",
+        extensions = "Scroller",
         escape = FALSE,
         rownames = FALSE,
         filter = "top",

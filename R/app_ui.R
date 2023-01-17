@@ -60,7 +60,6 @@ app_ui <- function(request) {
         bs4Dash::tabItems(
           bs4Dash::tabItem(
             tabName = "unidadvecinal",
-            waiter::useWaiter(),
             mod_unidadvecinal_ui("unidadvecinal_1")
           ),
           bs4Dash::tabItem(

@@ -45,16 +45,16 @@ app_server <- function(input, output, session) {
     )
   })
 
-  # Initialize waiter when loading course
-  w <- waiter::Waiter$new(
-    html = shiny::tagList(
-      waiter::spin_pixel(),
-      shiny::tags$br(),
-      shiny::h5("Loading course...")
-    ),
-    color = "#343a40",
-    fadeout = 500
-  )
+  # # Initialize waiter when loading course
+  # w <- waiter::Waiter$new(
+  #   html = shiny::tagList(
+  #     waiter::spin_pixel(),
+  #     shiny::tags$br(),
+  #     shiny::h5("Loading course...")
+  #   ),
+  #   color = "#343a40",
+  #   fadeout = 500
+  # )
 
   mod_unidadvecinal_server("unidadvecinal_1")
 }
