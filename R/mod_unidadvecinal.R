@@ -124,13 +124,6 @@ mod_unidadvecinal_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # Waiter
-    w_results <- waiter::Waiter$new(id = c(ns("results_map"),
-                                           ns("results_unidadvecinal"),
-                                           ns("results_google")),
-                                    html = waiter::spin_3k(),
-                                    color = waiter::transparent(0.5))
-
     coords <- reactive({
       if (!is.null(input$jsValueCoords)) {
         coords <- input$jsValueCoords
@@ -156,6 +149,7 @@ mod_unidadvecinal_server <- function(id) {
 
 
     output$full_address <- renderUI({
+      shiny::req(address(), coords())
       if (!is.null(address()) & !is.null(coords())) {
         shiny::tagList(shiny::HTML(paste0(
           "<b>Full address:</b><br>", address()
@@ -176,14 +170,16 @@ mod_unidadvecinal_server <- function(id) {
 
     point_selected <- reactive({
       shiny::req(coords())
-      sf::st_as_sf(
+      point <- sf::st_as_sf(
         data.frame(
           "long" = c(coords()$lng),
           "lat" = c(coords()$lat)
         ),
         coords = c("long", "lat"),
-        crs = sf::st_crs(unidad_vecinales)
+        crs = "WGS84"
       )
+      sf::st_transform(point, sf::st_crs(unidad_vecinales))
+
     })
 
     unidad_vecinal_temp <- reactive({
@@ -198,8 +194,8 @@ mod_unidadvecinal_server <- function(id) {
     })
 
     unidad_vecinal_result <- reactive({
-      shiny::req(coords())
-      if (!is.null(coords())) {
+      shiny::req(unidad_vecinal_temp())
+      if (!is.null(unidad_vecinal_temp())) {
         result <- t(unidad_vecinal_temp())
         result <- cbind("Feature" = rownames(result), result)
         rownames(result) <- 1:nrow(result)
@@ -246,9 +242,7 @@ mod_unidadvecinal_server <- function(id) {
     output$unidad_vecinal <- DT::renderDT({
       result <- unidad_vecinal_result() |>
         dplyr::left_join(dic_variables, by = c("Feature" = "NOMBRE")) |>
-        dplyr::rename("Value" = "1") |>
-        dplyr::rename(`Description` = `DESCRIPCIÓN`) |>
-        dplyr::select(`Description`, `Value`)
+        dplyr::select(`Description` = "DESCRIPCIÓN", `Value`="1")
 
       DT::datatable(
         result,
@@ -264,16 +258,10 @@ mod_unidadvecinal_server <- function(id) {
           autowidth = TRUE,
           #scrollX = TRUE,
           deferRender = TRUE,
-          scrollY = 600
+          scrollY = 550
           #scroller = TRUE
         )
       )
     })
   })
 }
-
-## To be copied in the UI
-# mod_unidadvecinal_ui("unidadvecinal_1")
-
-## To be copied in the server
-# mod_unidadvecinal_server("unidadvecinal_1")

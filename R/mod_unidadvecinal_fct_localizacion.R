@@ -47,16 +47,18 @@ get_uv_with_address <- function(direccion,
     direccion <- paste0(direccion, ", REGION ", region)
   }
 
-  geo_google <- ggmap::geocode(toupper(direccion))
+  res_google <- ggmap::geocode(toupper(direccion))
 
-    point.sf <- sf::st_as_sf(
-      data.frame(
-        "long" = c(res_google$lon),
-        "lat" = c(res_google$lat)
-      ),
-      coords = c("long", "lat"),
-      crs = sf::st_crs(unidad_vecinales)
-    )
+  point.sf <- sf::st_as_sf(
+    data.frame(
+      "long" = c(res_google$lon),
+      "lat" = c(res_google$lat)
+    ),
+    coords = c("long", "lat"),
+    crs = "WGS84"
+  )
+
+  point.sf <- sf::st_transform(point.sf, sf::st_crs(unidad_vecinales))
 
   sf::st_filter(unidad_vecinales, point.sf)
 
@@ -74,6 +76,7 @@ get_uv_with_address <- function(direccion,
 #' @import sf googleway ggmap
 get_uv <- function(point) {
 
+  point <- sf::st_transform(point, sf::st_crs(unidad_vecinales))
   sf::st_filter(unidad_vecinales, point)
 
 }

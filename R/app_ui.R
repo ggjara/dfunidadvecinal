@@ -43,11 +43,11 @@ app_ui <- function(request) {
             icon = icon("dashboard")
           ),
           bs4Dash::bs4SidebarMenuItem(
-            "Conventions",
-            tabName = "conventions",
+            "Manzana Censal",
+            tabName = "manzanacensal",
             icon = icon(
               lib = "glyphicon",
-              "list"
+              "apple"
             )
           )
         )
@@ -63,8 +63,8 @@ app_ui <- function(request) {
             mod_unidadvecinal_ui("unidadvecinal_1")
           ),
           bs4Dash::tabItem(
-            tabName = "conventions",
-            mod_conventions_ui("conventions_1")
+            tabName = "manzanacensal",
+            mod_manzanacensal_ui("manzanacensal_1")
           )
         )
       )
