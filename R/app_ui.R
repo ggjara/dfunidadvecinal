@@ -6,6 +6,8 @@
 #' @noRd
 app_ui <- function(request) {
   tagList(
+    # Use shinyjs
+
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
@@ -40,14 +42,17 @@ app_ui <- function(request) {
           bs4Dash::bs4SidebarMenuItem(
             "Unidad Vecinal",
             tabName = "unidadvecinal",
-            icon = icon("dashboard")
+            icon = icon(
+              lib = "font-awesome",
+              "house"
+            )
           ),
           bs4Dash::bs4SidebarMenuItem(
             "Manzana Censal",
             tabName = "manzanacensal",
             icon = icon(
-              lib = "glyphicon",
-              "apple"
+              lib = "font-awesome",
+              "apple-whole"
             )
           )
         )
@@ -57,6 +62,7 @@ app_ui <- function(request) {
         right = "2022"
       ),
       body = bs4Dash::dashboardBody(
+        shinyjs::useShinyjs(),
         bs4Dash::tabItems(
           bs4Dash::tabItem(
             tabName = "unidadvecinal",

@@ -49,9 +49,11 @@ get_mc_with_address <- function(direccion,
 #'
 #' @examples
 #' @import sf googleway ggmap
-get_mc <- function(point) {
+get_mc <- function(point, comuna) {
 
   point <- sf::st_transform(point, sf::st_crs(manzanas))
-  sf::st_filter(manzanas, point)
+  sf::st_filter(manzanas |> dplyr::filter(
+    COMUNA == comuna
+  ), point)
 
 }

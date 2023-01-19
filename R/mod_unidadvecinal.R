@@ -22,57 +22,7 @@ mod_unidadvecinal_ui <- function(id) {
         collapsible = TRUE,
         div(
           shiny::textInput(inputId = ns("my_address"), label = "Type An Address"),
-          HTML(
-            paste0(
-              " <script>
-                function initAutocomplete() {
-
-                 var autocomplete =   new google.maps.places.Autocomplete(document.getElementById('",
-              ns("my_address"),
-              "'),{types: ['geocode']});
-                 autocomplete.setFields(['address_components', 'formatted_address',  'geometry', 'icon', 'name']);
-                 autocomplete.addListener('place_changed', function() {
-                 var place = autocomplete.getPlace();
-                 if (!place.geometry) {
-                 return;
-                 }
-
-                 var addressPretty = place.formatted_address;
-                 var address = '';
-                 if (place.address_components) {
-                 address = [
-                 (place.address_components[0] && place.address_components[0].short_name || ''),
-                 (place.address_components[1] && place.address_components[1].short_name || ''),
-                 (place.address_components[2] && place.address_components[2].short_name || ''),
-                 (place.address_components[3] && place.address_components[3].short_name || ''),
-                 (place.address_components[4] && place.address_components[4].short_name || ''),
-                 (place.address_components[5] && place.address_components[5].short_name || ''),
-                 (place.address_components[6] && place.address_components[6].short_name || ''),
-                 (place.address_components[7] && place.address_components[7].short_name || '')
-                 ].join(' ');
-                 }
-                 var address_number =''
-                 address_number = [(place.address_components[0] && place.address_components[0].short_name || '')]
-                 var coords = place.geometry.location;
-                 //console.log(address);
-                 Shiny.onInputChange('",
-              ns('jsValue'),
-              "', address);
-                 Shiny.onInputChange('",
-              ns('jsValueAddressNumber'),
-              "', address_number);
-                 Shiny.onInputChange('",
-              ns('jsValuePretty'),
-              "', addressPretty);
-                 Shiny.onInputChange('",
-              ns('jsValueCoords'),
-              "', coords);});}
-                 </script>
-                 <script src='https://maps.googleapis.com/maps/api/js?key=",
-              config::get("google_api_key"),
-              "&libraries=places&callback=initAutocomplete' async defer></script>"
-            )
-          )
+          shiny::htmlOutput(outputId = ns("my_html"))
         )
       )
     )
@@ -123,6 +73,60 @@ collapsed =  TRUE
 mod_unidadvecinal_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
+    output$my_html <- shiny::renderUI({
+      shiny::HTML(
+        paste0(
+          " <script>
+                function initAutocompleteLala() {
+
+                 var autocomplete =   new google.maps.places.Autocomplete(document.getElementById('",
+          ns("my_address"),
+          "'),{types: ['geocode']});
+                 autocomplete.setFields(['address_components', 'formatted_address',  'geometry', 'icon', 'name']);
+                 autocomplete.addListener('place_changed', function() {
+                 var place = autocomplete.getPlace();
+                 if (!place.geometry) {
+                 return;
+                 }
+
+                 var addressPretty = place.formatted_address;
+                 var address = '';
+                 if (place.address_components) {
+                 address = [
+                 (place.address_components[0] && place.address_components[0].short_name || ''),
+                 (place.address_components[1] && place.address_components[1].short_name || ''),
+                 (place.address_components[2] && place.address_components[2].short_name || ''),
+                 (place.address_components[3] && place.address_components[3].short_name || ''),
+                 (place.address_components[4] && place.address_components[4].short_name || ''),
+                 (place.address_components[5] && place.address_components[5].short_name || ''),
+                 (place.address_components[6] && place.address_components[6].short_name || ''),
+                 (place.address_components[7] && place.address_components[7].short_name || '')
+                 ].join(' ');
+                 }
+                 var address_number =''
+                 address_number = [(place.address_components[0] && place.address_components[0].short_name || '')]
+                 var coords = place.geometry.location;
+                 console.log(address);
+                 Shiny.onInputChange('",
+          ns('jsValue'),
+          "', address);
+                 Shiny.onInputChange('",
+          ns('jsValueAddressNumber'),
+          "', address_number);
+                 Shiny.onInputChange('",
+          ns('jsValuePretty'),
+          "', addressPretty);
+                 Shiny.onInputChange('",
+          ns('jsValueCoords'),
+          "', coords);});}
+                 </script>
+                 <script src='https://maps.googleapis.com/maps/api/js?key=",
+          config::get("google_api_key"),
+          "&libraries=places&callback=initAutocompleteLala' async defer></script>"
+        )
+      )
+    })
 
     coords <- reactive({
       if (!is.null(input$jsValueCoords)) {
@@ -214,27 +218,31 @@ mod_unidadvecinal_server <- function(id) {
           "Esri.WorldGrayCanvas"
         )
       ))
-      tm <- tmap::tm_shape(
-        unidad_vecinales |>
-          filter(COD_REGION == unidad_vecinal_temp()$COD_REGION) |>
-          mutate(
-            color = case_when(
-              CODIGO_UV == unidad_vecinal_temp()$CODIGO_UV ~ "Selected",
-              T ~ "Others"
-            )
-          )
-      ) +
-        tmap::tm_polygons(
-          col = "color",
-          alpha = 0.7,
-          popup.vars = c("Hogares" = "HOGARES",
-                         "Personas" = "PERSONAS"),
-          title = "Unidades Vecinales",
-          id = "CODIGO_UV"
+      tmap::tmap_leaflet(
+        tmap::tm_shape(
+          unidad_vecinales |>
+            filter(COD_COMUNA == unidad_vecinal_temp()$COD_COMUNA) |>
+            mutate(
+              color = case_when(
+                CODIGO_UV == unidad_vecinal_temp()$CODIGO_UV ~ "Selected",
+                T ~ "Others"
+              )
+            ),
+          name = "Unidades Vecinales"
         ) +
-        tmap::tm_shape(point_selected()) +
-        tmap::tm_dots()
-      tmap::tmap_leaflet(tm)
+          tmap::tm_polygons(
+            col = "color",
+            alpha = 0.7,
+            popup.vars = c("Hogares" = "HOGARES",
+                           "Personas" = "PERSONAS"),
+            title = "Unidades Vecinales",
+            id = "CODIGO_UV"
+          ) +
+          tmap::tm_shape(point_selected(),
+                         name = "Direción") +
+          tmap::tm_dots()
+      )
+
     })
 
 

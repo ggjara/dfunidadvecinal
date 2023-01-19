@@ -4,7 +4,7 @@
 \alias{get_mc}
 \title{Get Unidad Vecinal With Lat Long}
 \usage{
-get_mc(point)
+get_mc(point, comuna)
 }
 \value{
 Unidad Vecinal
