@@ -64,7 +64,7 @@ app_ui <- function(request) {
           ),
           bs4Dash::tabItem(
             tabName = "manzanacensal"
-            #mod_manzanacensal_ui("manzanacensal_1")
+            mod_manzanacensal_ui("manzanacensal_1")
           )
         )
       )
