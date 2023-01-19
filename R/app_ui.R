@@ -63,8 +63,8 @@ app_ui <- function(request) {
             mod_unidadvecinal_ui("unidadvecinal_1")
           ),
           bs4Dash::tabItem(
-            tabName = "manzanacensal",
-            mod_manzanacensal_ui("manzanacensal_1")
+            tabName = "manzanacensal"
+            #mod_manzanacensal_ui("manzanacensal_1")
           )
         )
       )

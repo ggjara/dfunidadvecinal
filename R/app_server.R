@@ -57,5 +57,5 @@ app_server <- function(input, output, session) {
   # )
 
   mod_unidadvecinal_server("unidadvecinal_1")
-  mod_manzanacensal_server("manzanacensal_1")
+  #mod_manzanacensal_server("manzanacensal_1")
 }

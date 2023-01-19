@@ -11,7 +11,7 @@ mod_manzanacensal_ui <- function(id){
   ns <- NS(id)
   tagList(
     shiny::fluidRow(
-      column(
+      bs4Dash::column(
         width = 12,
         bs4Dash::box(
           id = ns("parameters"),
@@ -78,7 +78,7 @@ mod_manzanacensal_ui <- function(id){
       )
     ),
     shiny::fluidRow(
-      column(
+      bs4Dash::column(
         width = 6,
         bs4Dash::box(
           id = ns("results_manzanacensal"),
@@ -90,7 +90,7 @@ mod_manzanacensal_ui <- function(id){
           shinycssloaders::withSpinner(DT::DTOutput(outputId = ns("manzana_censal")))
         )
       ),
-      column(
+      bs4Dash::column(
         width = 6,
         bs4Dash::box(
           id = ns("results_map"),
