@@ -38,6 +38,7 @@ app_ui <- function(request) {
         elevation = 3,
         collapsed = TRUE,
         bs4Dash::bs4SidebarMenu(
+          id = "tab_selected",
           bs4Dash::bs4SidebarHeader(shiny::textOutput(outputId = "sidebar_intro")),
           bs4Dash::bs4SidebarMenuItem(
             "Unidad Vecinal",

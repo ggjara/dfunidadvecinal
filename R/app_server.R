@@ -45,6 +45,10 @@ app_server <- function(input, output, session) {
     )
   })
 
+  tab_selected <- reactive(
+    input$tab_selected
+  )
+
   # # Initialize waiter when loading course
   # w <- waiter::Waiter$new(
   #   html = shiny::tagList(
@@ -55,7 +59,11 @@ app_server <- function(input, output, session) {
   #   color = "#343a40",
   #   fadeout = 500
   # )
+  r <- shiny::reactiveValues(
+    unidadvecinal_downloaded = FALSE,
+    manzanacensal_downloaded = FALSE
+  )
 
-  mod_unidadvecinal_server("unidadvecinal_1")
-  mod_manzanacensal_server("manzanacensal_1")
+  mod_unidadvecinal_server("unidadvecinal_1", tab_selected, r)
+  mod_manzanacensal_server("manzanacensal_1", tab_selected, r)
 }

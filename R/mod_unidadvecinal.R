@@ -70,9 +70,24 @@ collapsed =  TRUE
 #'
 #' @noRd
 #' @import dplyr
-mod_unidadvecinal_server <- function(id) {
+mod_unidadvecinal_server <- function(id, tab_selected, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    # Lazy loading
+    observeEvent(coords(), {
+      if(!is.null(coords()) & !r$unidadvecinal_downloaded){
+        r$unidadvecinal_downloaded <- TRUE
+      }
+    })
+
+    unidad_vecinales <- eventReactive(r$unidadvecinal_downloaded, {
+      if(r$unidadvecinal_downloaded){
+        base::readRDS("data/lazy/unidad_vecinales.rds")
+      }
+      else{
+        NULL
+      }
+    })
 
     output$my_html <- shiny::renderUI({
       shiny::HTML(
@@ -182,13 +197,13 @@ mod_unidadvecinal_server <- function(id) {
         coords = c("long", "lat"),
         crs = "WGS84"
       )
-      sf::st_transform(point, sf::st_crs(unidad_vecinales))
+      sf::st_transform(point, sf::st_crs(unidad_vecinales()))
 
     })
 
     unidad_vecinal_temp <- reactive({
       shiny::req(point_selected())
-      sf::st_drop_geometry(get_uv(point_selected()))
+      sf::st_drop_geometry(get_uv(unidad_vecinales(), point_selected()))
     })
 
     observeEvent(coords(), {
@@ -220,7 +235,7 @@ mod_unidadvecinal_server <- function(id) {
       ))
       tmap::tmap_leaflet(
         tmap::tm_shape(
-          unidad_vecinales |>
+          unidad_vecinales() |>
             filter(COD_COMUNA == unidad_vecinal_temp()$COD_COMUNA) |>
             mutate(
               color = case_when(

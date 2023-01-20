@@ -10,6 +10,7 @@
 mod_manzanacensal_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    waiter::useWaiter(),
     shinyjs::useShinyjs(),
     shiny::fluidRow(bs4Dash::column(
       width = 12,
@@ -24,7 +25,7 @@ mod_manzanacensal_ui <- function(id) {
           shinyWidgets::pickerInput(
             "Choose a comuna",
             inputId = ns("comuna"),
-            choices = sort(unique(manzanas$COMUNA)),
+            choices = manzanas_comunas,
             selected = "",
             options = list(
               `live-search` = TRUE,
@@ -77,9 +78,27 @@ mod_manzanacensal_ui <- function(id) {
 #' manzanacensal Server Functions
 #'
 #' @noRd
-mod_manzanacensal_server <- function(id) {
+mod_manzanacensal_server <- function(id, tab_selected, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
+    # Lazy loading
+    observeEvent(coords(), {
+      if(!is.null(coords()) & !r$manzanacensal_downloaded){
+        r$manzanacensal_downloaded <- TRUE
+      }
+    })
+
+    manzanas <- eventReactive(r$manzanacensal_downloaded, {
+      if(r$manzanacensal_downloaded){
+        base::readRDS("data/lazy/manzanas.rds")
+      }
+      else{
+        NULL
+      }
+    })
+
+    # End lazy loaging
 
     shinyjs::hide("my_address")
 
@@ -166,7 +185,7 @@ mod_manzanacensal_server <- function(id) {
     })
 
     point_selected <- reactive({
-      shiny::req(coords())
+      shiny::req(coords(), manzanas())
       point <- sf::st_as_sf(
         data.frame(
           "long" = c(coords()$lng),
@@ -175,12 +194,12 @@ mod_manzanacensal_server <- function(id) {
         coords = c("long", "lat"),
         crs = "WGS84"
       )
-      sf::st_transform(point, sf::st_crs(manzanas))
+      sf::st_transform(point, sf::st_crs(manzanas()))
     })
 
     manzana_censal_temp <- reactive({
-      shiny::req(point_selected(), input$comuna)
-      sf::st_drop_geometry(get_mc(point_selected(), input$comuna))
+      shiny::req(manzanas(), point_selected(), input$comuna)
+      sf::st_drop_geometry(get_mc(manzanas(), point_selected(), input$comuna))
     })
 
     manzana_censal_result <- reactive({
@@ -241,9 +260,9 @@ mod_manzanacensal_server <- function(id) {
       ))
       tmap::tmap_leaflet(
         tmap::tm_shape(
-          manzanas |>
-            filter(NOMBRE_DIS == manzana_censal_temp()$NOMBRE_DIS) |>
-            mutate(
+          manzanas() |>
+            dplyr::filter(NOMBRE_DIS == manzana_censal_temp()$NOMBRE_DIS) |>
+            dplyr::mutate(
               color = case_when(
                 MANZENT == manzana_censal_temp()$MANZENT ~ "Selected",
                 T ~ "Others"

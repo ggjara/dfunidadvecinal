@@ -4,7 +4,7 @@
 \alias{get_uv}
 \title{Get Unidad Vecinal With Lat Long}
 \usage{
-get_uv(point)
+get_uv(unidad_vecinales, point)
 }
 \value{
 Unidad Vecinal

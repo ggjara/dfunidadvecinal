@@ -74,7 +74,7 @@ get_uv_with_address <- function(direccion,
 #'
 #' @examples
 #' @import sf googleway ggmap
-get_uv <- function(point) {
+get_uv <- function(unidad_vecinales, point) {
 
   point <- sf::st_transform(point, sf::st_crs(unidad_vecinales))
   sf::st_filter(unidad_vecinales, point)

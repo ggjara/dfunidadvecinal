@@ -1,4 +1,3 @@
-
 #' Get Unidad Vecinal With Address
 #'
 #' @parameter direccion Calle y Número
@@ -49,11 +48,15 @@ get_mc_with_address <- function(direccion,
 #'
 #' @examples
 #' @import sf googleway ggmap
-get_mc <- function(point, comuna) {
+get_mc <- function(manzanas, point, comuna) {
 
   point <- sf::st_transform(point, sf::st_crs(manzanas))
   sf::st_filter(manzanas |> dplyr::filter(
     COMUNA == comuna
   ), point)
 
+}
+
+load_manzanas <- function(){
+  base::load("data/manzanas/manzanas.Rda")
 }
