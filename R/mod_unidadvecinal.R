@@ -233,10 +233,18 @@ mod_unidadvecinal_server <- function(id, tab_selected, r) {
           "Esri.WorldGrayCanvas"
         )
       ))
+
+      # SHOW ONLY COMUNAS
+      uv_temp <- unidad_vecinales() |>
+        filter(COD_COMUNA == unidad_vecinal_temp()$COD_COMUNA)
+      uv_temp2 <- sf::st_drop_geometry(uv_temp)
+      uv_temp2$centroide <- sf::st_centroid(sf::st_geometry(uv_temp))
+      sf::st_geometry(uv_temp2) <- "centroide"
+
       tmap::tmap_leaflet(
+        # UNIDADES VECINALES
         tmap::tm_shape(
-          unidad_vecinales() |>
-            filter(COD_COMUNA == unidad_vecinal_temp()$COD_COMUNA) |>
+          uv_temp |>
             mutate(
               color = case_when(
                 CODIGO_UV == unidad_vecinal_temp()$CODIGO_UV ~ "Selected",
@@ -248,14 +256,25 @@ mod_unidadvecinal_server <- function(id, tab_selected, r) {
           tmap::tm_polygons(
             col = "color",
             alpha = 0.7,
-            popup.vars = c("Hogares" = "HOGARES",
-                           "Personas" = "PERSONAS"),
+            popup.vars = TRUE,
             title = "Unidades Vecinales",
             id = "CODIGO_UV"
           ) +
+          # CENTROIDES
+          tmap::tm_shape(uv_temp2,
+                         name = "Centroides") +
+          tmap::tm_dots(
+            col = "black",
+            popup.vars = TRUE,
+            id = "CODIGO_UV",
+            size = 0.005,
+            alpha = 0.6
+          ) +
+          # SELECTED ADDRESS
           tmap::tm_shape(point_selected(),
                          name = "Direción") +
-          tmap::tm_dots()
+          tmap::tm_dots(
+            col = "red")
       )
 
     })

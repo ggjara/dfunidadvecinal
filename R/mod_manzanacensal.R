@@ -258,10 +258,16 @@ mod_manzanacensal_server <- function(id, tab_selected, r) {
           "Esri.WorldGrayCanvas"
         )
       ))
+      manzanas_temp <- manzanas() |>
+        dplyr::filter(NOMBRE_DIS == manzana_censal_temp()$NOMBRE_DIS)
+      manzanas_temp2 <- sf::st_drop_geometry(manzanas_temp)
+      manzanas_temp2$centroide <- sf::st_centroid(sf::st_geometry(manzanas_temp))
+      sf::st_geometry(manzanas_temp2) <- "centroide"
+
       tmap::tmap_leaflet(
         tmap::tm_shape(
-          manzanas() |>
-            dplyr::filter(NOMBRE_DIS == manzana_censal_temp()$NOMBRE_DIS) |>
+          # MANZANAS CENSALES
+          manzanas_temp |>
             dplyr::mutate(
               color = case_when(
                 MANZENT == manzana_censal_temp()$MANZENT ~ "Selected",
@@ -273,14 +279,26 @@ mod_manzanacensal_server <- function(id, tab_selected, r) {
           tmap::tm_polygons(
             col = "color",
             alpha = 0.7,
-            # popup.vars = c("Hogares" = "HOGARES",
-            #                "Personas" = "PERSONAS"),
+            popup.vars = TRUE,
             title = "Manzanas censales",
             id = "MANZENT"
           ) +
+          # CENTROIDES
+          tmap::tm_shape(manzanas_temp2,
+                         name = "Centroides") +
+          tmap::tm_dots(
+            col = "black",
+            popup.vars = TRUE,
+            id = "MANZENT",
+            size = 0.005,
+            alpha = 0.6
+          ) +
+          # ADDRESS
           tmap::tm_shape(point_selected(),
                          name = "Dirección") +
-          tmap::tm_dots()
+          tmap::tm_dots(
+            col = "red"
+          )
       )
     })
 

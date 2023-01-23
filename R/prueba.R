@@ -1,1 +1,0 @@
-manzanas <- dplyr::tibble()

@@ -41,6 +41,14 @@ app_ui <- function(request) {
           id = "tab_selected",
           bs4Dash::bs4SidebarHeader(shiny::textOutput(outputId = "sidebar_intro")),
           bs4Dash::bs4SidebarMenuItem(
+            "Welcome",
+            tabName = "welcome",
+            icon = icon(
+              lib = "font-awesome",
+              "circle-info"
+            )
+          ),
+          bs4Dash::bs4SidebarMenuItem(
             "Unidad Vecinal",
             tabName = "unidadvecinal",
             icon = icon(
@@ -65,6 +73,10 @@ app_ui <- function(request) {
       body = bs4Dash::dashboardBody(
         shinyjs::useShinyjs(),
         bs4Dash::tabItems(
+          bs4Dash::tabItem(
+            tabName = "welcome",
+            "Welcome"
+          ),
           bs4Dash::tabItem(
             tabName = "unidadvecinal",
             mod_unidadvecinal_ui("unidadvecinal_1")
